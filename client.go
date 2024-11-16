@@ -14,11 +14,12 @@ import (
 )
 
 type Client struct {
-	ApiKey  *string
-	BaseURL *url.URL
-	options Options
-	client  *http.Client
-	Ledger  *LedgerService
+	ApiKey        *string
+	BaseURL       *url.URL
+	options       Options
+	client        *http.Client
+	Ledger        *LedgerService
+	LedgerBalance *LedgerBalanceService
 }
 
 type service struct {
@@ -33,7 +34,7 @@ type Options struct {
 
 func DefaultOptions() Options {
 	return Options{
-		RetryCount: 3,
+		RetryCount: 1,
 		Timeout:    time.Second * 10,
 		Logger:     NewDefaultLogger(),
 	}
@@ -69,6 +70,7 @@ func NewClient(baseURL *url.URL, apiKey *string, opts ...ClientOption) *Client {
 
 	//initialize services
 	client.Ledger = &LedgerService{client: client}
+	client.LedgerBalance = &LedgerBalanceService{client: client}
 
 	return client
 }
