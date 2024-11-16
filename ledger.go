@@ -22,7 +22,7 @@ type CreateLedgerRequest struct {
 
 func (s *LedgerService) Get(id string) (*Ledger, *http.Response, error) {
 	u := fmt.Sprintf("ledgers/%s", id)
-	req, err := s.client.NewRequest(u, "GET", nil)
+	req, err := s.client.NewRequest(u, http.MethodGet, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -37,7 +37,7 @@ func (s *LedgerService) Get(id string) (*Ledger, *http.Response, error) {
 }
 
 func (s *LedgerService) Create(body *CreateLedgerRequest) (*Ledger, *http.Response, error) {
-	req, err := s.client.NewRequest("ledgers", "POST", body)
+	req, err := s.client.NewRequest("ledgers", http.MethodPost, body)
 	if err != nil {
 		return nil, nil, err
 	}
