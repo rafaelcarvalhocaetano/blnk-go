@@ -16,8 +16,13 @@ import (
 type Client struct {
 	ApiKey  *string
 	BaseURL *url.URL
-	Options Options
+	options Options
 	client  *http.Client
+	Ledger  *LedgerService
+}
+
+type service struct {
+	client *Client
 }
 
 type Options struct {
@@ -35,26 +40,35 @@ func DefaultOptions() Options {
 }
 
 func NewClient(baseURL *url.URL, apiKey *string, opts ...ClientOption) *Client {
+	//if base url is nil or empty, return error
+	if baseURL == nil || baseURL.String() == "" {
+		panic(errors.New("base url is required"))
+	}
+
+	//check if base url ends with a "/", if it doesnt append it
+	if baseURL.String()[len(baseURL.String())-1:] != "/" {
+		baseURL.Path += "/"
+	}
+
 	//set default options if not provided
 	client := &Client{
 		ApiKey:  apiKey,
 		BaseURL: baseURL,
-		Options: DefaultOptions(),
+		options: DefaultOptions(),
 		client:  &http.Client{Timeout: 10 * time.Second},
-	}
-	//if base url is nil or empty, return error
-	if baseURL == nil || baseURL.String() == "" {
-		panic(errors.New("base url is required"))
 	}
 
 	//apply options
 	for _, opt := range opts {
 		opt(client)
 		//if options.timeout is set, update the client.client timeout
-		if client.Options.Timeout != 0 {
-			client.client.Timeout = client.Options.Timeout
+		if client.options.Timeout != 0 {
+			client.client.Timeout = client.options.Timeout
 		}
 	}
+
+	//initialize services
+	client.Ledger = &LedgerService{client: client}
 
 	return client
 }
@@ -110,28 +124,24 @@ func (c *Client) NewRequest(endpoint, method string, opt interface{}) (*http.Req
 }
 
 // to:Do implement retry strategies
-func (c *Client) CallWithRetry(endpoint, method string, opt, resBody interface{}) (*http.Response, error) {
-	retryCount := c.Options.RetryCount
+func (c *Client) CallWithRetry(req *http.Request, resBody interface{}) (*http.Response, error) {
+	retryCount := c.options.RetryCount
 
 	var resp *http.Response
+	var err error
 
 	for i := 0; i < retryCount; i++ {
-		req, err := c.NewRequest(endpoint, method, opt)
-		if err != nil {
-			return nil, err
-		}
-		//print the request
+
 		resp, err = c.client.Do(req)
-		//print the resp
 		if err != nil {
-			c.Options.Logger.Info(err.Error())
+			c.options.Logger.Info(err.Error())
 			time.Sleep(time.Second * 2)
 			continue
 		}
 
 		if resp.StatusCode >= 500 {
 			logString := fmt.Sprintf("Request failed with status code %v and Status %v", resp.StatusCode, resp.Status)
-			c.Options.Logger.Error(logString)
+			c.options.Logger.Error(logString)
 			time.Sleep(time.Second * 2)
 			continue
 		}
@@ -139,7 +149,7 @@ func (c *Client) CallWithRetry(endpoint, method string, opt, resBody interface{}
 		//check resp
 		err = c.DecodeResponse(resp, resBody)
 		if err != nil {
-			c.Options.Logger.Error(err.Error())
+			c.options.Logger.Error(err.Error())
 			return resp, err
 		}
 
