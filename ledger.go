@@ -36,7 +36,7 @@ func (s *LedgerService) Get(id string) (*Ledger, *http.Response, error) {
 	return ledger, resp, nil
 }
 
-func (s *LedgerService) Create(body *CreateLedgerRequest) (*Ledger, *http.Response, error) {
+func (s *LedgerService) Create(body CreateLedgerRequest) (*Ledger, *http.Response, error) {
 	req, err := s.client.NewRequest("ledgers", http.MethodPost, body)
 	if err != nil {
 		return nil, nil, err

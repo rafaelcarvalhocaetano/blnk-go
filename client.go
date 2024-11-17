@@ -20,6 +20,7 @@ type Client struct {
 	client        *http.Client
 	Ledger        *LedgerService
 	LedgerBalance *LedgerBalanceService
+	Transaction   *TransactionService
 }
 
 type service struct {
@@ -71,6 +72,7 @@ func NewClient(baseURL *url.URL, apiKey *string, opts ...ClientOption) *Client {
 	//initialize services
 	client.Ledger = &LedgerService{client: client}
 	client.LedgerBalance = &LedgerBalanceService{client: client}
+	client.Transaction = &TransactionService{client: client}
 
 	return client
 }
