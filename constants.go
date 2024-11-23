@@ -73,3 +73,10 @@ const (
 	InflightStatusCommit InflightStatus = "commit"
 	InflightStatusVoid   InflightStatus = "void"
 )
+
+type IdentityType string
+
+const (
+	Individual   IdentityType = "individual"
+	Organization IdentityType = "organization"
+)
