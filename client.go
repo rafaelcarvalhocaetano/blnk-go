@@ -14,13 +14,15 @@ import (
 )
 
 type Client struct {
-	ApiKey        *string
-	BaseURL       *url.URL
-	options       Options
-	client        *http.Client
-	Ledger        *LedgerService
-	LedgerBalance *LedgerBalanceService
-	Transaction   *TransactionService
+	ApiKey         *string
+	BaseURL        *url.URL
+	options        Options
+	client         *http.Client
+	Ledger         *LedgerService
+	LedgerBalance  *LedgerBalanceService
+	Transaction    *TransactionService
+	BalanceMonitor *BalanceMonitorService
+	Identity       *IdentityService
 }
 
 type service struct {
@@ -73,6 +75,8 @@ func NewClient(baseURL *url.URL, apiKey *string, opts ...ClientOption) *Client {
 	client.Ledger = &LedgerService{client: client}
 	client.LedgerBalance = &LedgerBalanceService{client: client}
 	client.Transaction = &TransactionService{client: client}
+	client.BalanceMonitor = &BalanceMonitorService{client: client}
+	client.Identity = &IdentityService{client: client}
 
 	return client
 }

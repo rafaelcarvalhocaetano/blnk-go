@@ -19,7 +19,7 @@ type Source struct {
 type ParentTransaction struct {
 	Amount        float64                `json:"amount"`
 	Reference     string                 `json:"reference"`
-	Precision     int                    `json:"precision"`
+	Precision     int64                  `json:"precision"`
 	Description   string                 `json:"description"`
 	Sources       []Source               `json:"sources,omitempty"`
 	Destinations  []Source               `json:"destinations,omitempty"`
@@ -27,7 +27,7 @@ type ParentTransaction struct {
 	Currency      string                 `json:"currency"`
 	Source        *string                `json:"source,omitempty"`
 	Destination   *string                `json:"destination,omitempty"`
-	PreciseAmount float64                `json:"precise_amount"`
+	PreciseAmount int64                  `json:"precise_amount"`
 	Status        PryTransactionStatus   `json:"status"`
 	CreatedAt     time.Time              `json:"created_at"`
 	MetaData      map[string]interface{} `json:"meta_data,omitempty"`

@@ -80,3 +80,15 @@ const (
 	Individual   IdentityType = "individual"
 	Organization IdentityType = "organization"
 )
+
+// MonitorConditionOperators represents the supported operators for a monitor condition.
+type MonitorConditionOperators string
+
+const (
+	OperatorGreaterThan        MonitorConditionOperators = ">"
+	OperatorLessThan           MonitorConditionOperators = "<"
+	OperatorEqualTo            MonitorConditionOperators = "="
+	OperatorNotEqualTo         MonitorConditionOperators = "!="
+	OperatorGreaterThanOrEqual MonitorConditionOperators = ">="
+	OperatorLessThanOrEqual    MonitorConditionOperators = "<="
+)
