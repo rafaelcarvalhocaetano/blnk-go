@@ -92,3 +92,11 @@ const (
 	OperatorGreaterThanOrEqual MonitorConditionOperators = ">="
 	OperatorLessThanOrEqual    MonitorConditionOperators = "<="
 )
+
+type ResourceType string
+
+const (
+	Ledgers      ResourceType = "ledgers"
+	Transactions ResourceType = "transactions"
+	Balances     ResourceType = "balances"
+)

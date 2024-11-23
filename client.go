@@ -23,6 +23,7 @@ type Client struct {
 	Transaction    *TransactionService
 	BalanceMonitor *BalanceMonitorService
 	Identity       *IdentityService
+	Search         *SearchService
 }
 
 type service struct {
@@ -77,6 +78,7 @@ func NewClient(baseURL *url.URL, apiKey *string, opts ...ClientOption) *Client {
 	client.Transaction = &TransactionService{client: client}
 	client.BalanceMonitor = &BalanceMonitorService{client: client}
 	client.Identity = &IdentityService{client: client}
+	client.Search = &SearchService{client: client}
 
 	return client
 }
