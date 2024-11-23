@@ -6,8 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/google/go-querystring/query"
@@ -186,4 +189,75 @@ func (c *Client) DecodeResponse(resp *http.Response, v interface{}) error {
 	}
 
 	return nil
+}
+
+func (c *Client) DoUpload(endpoint string, fileParam string, file interface{}, fields map[string]string) ([]byte, error) {
+	// Prepare multipart form data
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	// Add file to the form
+	var fileReader io.Reader
+	var fileName string
+
+	switch v := file.(type) {
+	case string: // File path
+		openedFile, err := os.Open(v)
+		if err != nil {
+			return nil, err
+		}
+		defer openedFile.Close()
+		fileReader = openedFile
+		fileName = filepath.Base(v)
+	case io.Reader: // Read stream
+		fileReader = v
+		fileName = "upload" // Default file name
+	default:
+		return nil, fmt.Errorf("unsupported file input type")
+	}
+
+	part, err := writer.CreateFormFile(fileParam, fileName)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := io.Copy(part, fileReader); err != nil {
+		return nil, err
+	}
+
+	// Add additional form fields
+	for key, value := range fields {
+		if err := writer.WriteField(key, value); err != nil {
+			return nil, err
+		}
+	}
+
+	writer.Close()
+
+	// Create the HTTP request
+	req, err := http.NewRequest("POST", c.BaseURL.ResolveReference(&url.URL{Path: endpoint}).String(), body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	// Execute the HTTP request
+	resp, err := c.client.Do(req)
+	if err != nil {
+		c.options.Logger.Error(fmt.Sprintf("Upload failed: %v", err))
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Handle the response
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		c.options.Logger.Info("Upload successful")
+		return respBody, nil
+	}
+
+	return nil, fmt.Errorf("upload failed with status %d: %s", resp.StatusCode, string(respBody))
 }
