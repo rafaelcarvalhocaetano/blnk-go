@@ -27,6 +27,7 @@ type Client struct {
 	BalanceMonitor *BalanceMonitorService
 	Identity       *IdentityService
 	Search         *SearchService
+	Reconciliation *ReconciliationService
 }
 
 type service struct {
@@ -82,6 +83,7 @@ func NewClient(baseURL *url.URL, apiKey *string, opts ...ClientOption) *Client {
 	client.BalanceMonitor = &BalanceMonitorService{client: client}
 	client.Identity = &IdentityService{client: client}
 	client.Search = &SearchService{client: client}
+	client.Reconciliation = &ReconciliationService{client: client}
 
 	return client
 }
@@ -191,7 +193,7 @@ func (c *Client) DecodeResponse(resp *http.Response, v interface{}) error {
 	return nil
 }
 
-func (c *Client) DoUpload(endpoint string, fileParam string, file interface{}, fields map[string]string) ([]byte, error) {
+func (c *Client) NewFileUploadRequest(endpoint string, fileParam string, file interface{}, fields map[string]string) (*http.Request, error) {
 	// Prepare multipart form data
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
@@ -234,30 +236,14 @@ func (c *Client) DoUpload(endpoint string, fileParam string, file interface{}, f
 	writer.Close()
 
 	// Create the HTTP request
-	req, err := http.NewRequest("POST", c.BaseURL.ResolveReference(&url.URL{Path: endpoint}).String(), body)
+	req, err := http.NewRequest(http.MethodPost, c.BaseURL.ResolveReference(&url.URL{Path: endpoint}).String(), body)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
-	// Execute the HTTP request
-	resp, err := c.client.Do(req)
-	if err != nil {
-		c.options.Logger.Error(fmt.Sprintf("Upload failed: %v", err))
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	// Handle the response
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	if c.ApiKey != nil {
+		req.Header.Add("X-Blnk-Key", *c.ApiKey)
 	}
 
-	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-		c.options.Logger.Info("Upload successful")
-		return respBody, nil
-	}
-
-	return nil, fmt.Errorf("upload failed with status %d: %s", resp.StatusCode, string(respBody))
+	return req, nil
 }

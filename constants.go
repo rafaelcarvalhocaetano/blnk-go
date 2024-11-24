@@ -100,3 +100,31 @@ const (
 	Transactions ResourceType = "transactions"
 	Balances     ResourceType = "balances"
 )
+
+type CriteriaField string
+
+const (
+	CriteriaFieldAmount      CriteriaField = "amount"
+	CriteriaFieldCurrency    CriteriaField = "currency"
+	CriteriaFieldReference   CriteriaField = "reference"
+	CriteriaFieldDescription CriteriaField = "description"
+	CriteriaFieldDate        CriteriaField = "date"
+)
+
+type ReconciliationOperator string
+
+const (
+	ReconciliationOperatorEquals      ReconciliationOperator = "equals"
+	ReconciliationOperatorGreaterThan ReconciliationOperator = "greater_than"
+	ReconciliationOperatorLessThan    ReconciliationOperator = "less_than"
+	ReconciliationOperatorContains    ReconciliationOperator = "contains"
+)
+
+// Strategy represents the allowed reconciliation strategies.
+type ReconciliationStrategy string
+
+const (
+	ReconciliationStrategyOneToOne  ReconciliationStrategy = "one_to_one"
+	ReconciliationStrategyOneToMany ReconciliationStrategy = "one_to_many"
+	ReconciliationStrategyManyToOne ReconciliationStrategy = "many_to_one"
+)
