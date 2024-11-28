@@ -34,7 +34,7 @@ type IdentityResponse struct {
 	Identity
 }
 
-func (s *IdentityService) Create(identity *Identity) (*IdentityResponse, *http.Response, error) {
+func (s *IdentityService) Create(identity Identity) (*IdentityResponse, *http.Response, error) {
 	//validate the identity
 	if err := ValidateCreateIdentity(identity); err != nil {
 		return nil, nil, err
