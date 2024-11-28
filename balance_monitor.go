@@ -14,9 +14,9 @@ type MonitorCondition struct {
 // MonitorData represents the data structure for monitoring information.
 type MonitorData struct {
 	Condition   MonitorCondition `json:"condition"`
-	Description *string          `json:"description,omitempty"`
+	Description string           `json:"description,omitempty"`
 	BalanceID   string           `json:"balance_id"`
-	CallBackURL *string          `json:"call_back_url,omitempty"`
+	CallBackURL string           `json:"call_back_url,omitempty"`
 }
 
 // MonitorDataResp extends MonitorData with additional fields for response data.
