@@ -34,7 +34,7 @@ type CreateLedgerBalanceRequest struct {
 	MetaData   interface{} `json:"meta_data,omitempty"`
 }
 
-func (s *LedgerBalanceService) Create(body *CreateLedgerBalanceRequest) (*LedgerBalance, *http.Response, error) {
+func (s *LedgerBalanceService) Create(body CreateLedgerBalanceRequest) (*LedgerBalance, *http.Response, error) {
 	req, err := s.client.NewRequest("balances", http.MethodPost, body)
 	if err != nil {
 		return nil, nil, err
