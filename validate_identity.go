@@ -3,7 +3,7 @@ package blnkgo
 import "errors"
 
 // validate fields in Idenity based on the type of identity selected
-func ValidateCreateIdentity(identity *Identity) error {
+func ValidateCreateIdentity(identity Identity) error {
 	if identity.IdentityType == Individual {
 		if identity.FirstName == nil {
 			return errors.New("FirstName is required for Individual")
