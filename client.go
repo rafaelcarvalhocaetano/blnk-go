@@ -74,6 +74,9 @@ func NewClient(baseURL *url.URL, apiKey *string, opts ...ClientOption) *Client {
 		if client.options.Timeout != 0 {
 			client.client.Timeout = client.options.Timeout
 		}
+		if client.options.RetryCount == 0 {
+			client.options.RetryCount = 1
+		}
 	}
 
 	//initialize services
@@ -146,7 +149,6 @@ func (c *Client) CallWithRetry(req *http.Request, resBody interface{}) (*http.Re
 	var err error
 
 	for i := 0; i < retryCount; i++ {
-
 		resp, err = c.client.Do(req)
 		if err != nil {
 			c.options.Logger.Info(err.Error())
@@ -154,6 +156,7 @@ func (c *Client) CallWithRetry(req *http.Request, resBody interface{}) (*http.Re
 			continue
 		}
 
+		defer resp.Body.Close()
 		if resp.StatusCode >= 500 {
 			logString := fmt.Sprintf("Request failed with status code %v and Status %v", resp.StatusCode, resp.Status)
 			c.options.Logger.Error(logString)
@@ -170,8 +173,6 @@ func (c *Client) CallWithRetry(req *http.Request, resBody interface{}) (*http.Re
 
 		return resp, nil
 	}
-
-	defer resp.Body.Close()
 	return nil, errors.New("max retry count exceeded")
 }
 
