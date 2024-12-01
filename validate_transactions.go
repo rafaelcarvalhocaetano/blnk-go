@@ -3,19 +3,19 @@ package blnkgo
 import "errors"
 
 func ValidateCreateTransacation(t CreateTransactionRequest) error {
-	if t.Source != nil && len(t.Sources) > 0 {
+	if t.Source != "" && len(t.Sources) > 0 {
 		return errors.New("you can not use both Source and Sources")
 	}
 
-	if t.Source == nil && len(t.Sources) == 0 {
+	if t.Source == "" && len(t.Sources) == 0 {
 		return errors.New("you must use either Source or Sources")
 	}
 
-	if t.Destination != nil && len(t.Destinations) > 0 {
+	if t.Destination != "" && len(t.Destinations) > 0 {
 		return errors.New("you can not use both Destination and Destinations")
 	}
 
-	if t.Destination == nil && len(t.Destinations) == 0 {
+	if t.Destination == "" && len(t.Destinations) == 0 {
 		return errors.New("you must use either Destination or Destinations")
 	}
 

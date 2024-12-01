@@ -12,7 +12,7 @@ type TransactionService service
 type Source struct {
 	Identifier   string       `json:"identifier"`
 	Distribution Distribution `json:"distribution"`
-	Narration    *string      `json:"narration,omitempty"`
+	Narration    string       `json:"narration,omitempty"`
 }
 
 // CreateTransactionResponse represents the response for creating a transaction.
@@ -21,29 +21,29 @@ type ParentTransaction struct {
 	Reference     string                 `json:"reference"`
 	Precision     int64                  `json:"precision"`
 	Description   string                 `json:"description"`
+	Currency      string                 `json:"currency"`
 	Sources       []Source               `json:"sources,omitempty"`
 	Destinations  []Source               `json:"destinations,omitempty"`
-	Rate          float64                `json:"rate"`
-	Currency      string                 `json:"currency"`
-	Source        *string                `json:"source,omitempty"`
-	Destination   *string                `json:"destination,omitempty"`
+	Rate          float64                `json:"rate,omitempty"`
+	Source        string                 `json:"source,omitempty"`
+	Destination   string                 `json:"destination,omitempty"`
 	PreciseAmount int64                  `json:"precise_amount"`
 	Status        PryTransactionStatus   `json:"status"`
-	CreatedAt     time.Time              `json:"created_at"`
 	MetaData      map[string]interface{} `json:"meta_data,omitempty"`
 }
 
 type CreateTransactionRequest struct {
-	Inflight           bool      `json:"inflight"`
-	InflightExpiryDate time.Time `json:"inflight_expiry_date,omitempty"`
-	ScheduledFor       time.Time `json:"scheduled_for,omitempty"`
-	AllowOverdraft     bool      `json:"allow_overdraft,omitempty"`
 	ParentTransaction
+	Inflight           bool       `json:"inflight,omitempty"`
+	InflightExpiryDate *time.Time `json:"inflight_expiry_date,omitempty"`
+	ScheduledFor       *time.Time `json:"scheduled_for,omitempty"`
+	AllowOverdraft     bool       `json:"allow_overdraft,omitempty"`
 }
 
 type Transaction struct {
 	ParentTransaction
-	TransactionID string `json:"transaction_id"`
+	CreatedAt     time.Time `json:"created_at"`
+	TransactionID string    `json:"transaction_id"`
 }
 
 type UpdateStatus struct {

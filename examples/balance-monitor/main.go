@@ -63,5 +63,5 @@ func main() {
 	}
 
 	fmt.Println(resp.StatusCode)
-	fmt.Println(bl.MonitorID)
+	fmt.Println(bl.BalanceID)
 }

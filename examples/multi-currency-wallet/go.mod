@@ -1,4 +1,4 @@
-module balance-monitor
+module multi-currency-wallet
 
 go 1.22.2
 
