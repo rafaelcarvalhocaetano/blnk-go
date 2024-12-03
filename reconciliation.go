@@ -16,7 +16,7 @@ type ReconciliationUploadResp struct {
 type Criteria struct {
 	Field          CriteriaField          `json:"field"`
 	Operator       ReconciliationOperator `json:"operator"`
-	AllowableDrift *int                   `json:"allowable_drift,omitempty"` // Optional field
+	AllowableDrift float64                `json:"allowable_drift,omitempty"` // Optional field
 }
 
 // Matcher represents a matching rule with multiple criteria.

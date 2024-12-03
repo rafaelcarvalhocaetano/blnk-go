@@ -1,4 +1,4 @@
-module escrow-application
+module reconciliation
 
 go 1.22.2
 
