@@ -59,7 +59,11 @@ func main() {
 	}
 
 	escrowBalance2, resp, err := client.LedgerBalance.Create(escrowBalanceBody2)
-
+	if err != nil {
+		fmt.Print(err.Error())
+		return
+	}
+	fmt.Println(resp.StatusCode)
 	fundAliceBody := blnkgo.CreateTransactionRequest{
 		ParentTransaction: blnkgo.ParentTransaction{
 			Amount:      1000,
