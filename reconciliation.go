@@ -58,7 +58,7 @@ func (s *ReconciliationService) CreateMatchingRule(matcher Matcher) (*RunReconRe
 }
 
 func (s *ReconciliationService) Run(data RunReconData) (*RunReconResp, *http.Response, error) {
-	req, err := s.client.NewRequest("reconciliation/run", http.MethodPost, data)
+	req, err := s.client.NewRequest("reconciliation/start", http.MethodPost, data)
 	if err != nil {
 		return nil, nil, err
 	}
