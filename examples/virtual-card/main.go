@@ -58,6 +58,7 @@ func main() {
 				"merchant_name": "Store ABC",
 				"customer_name": "Jerry",
 			},
+			Description: "Purchase at Store ABC",
 		},
 		AllowOverdraft: true,
 	}
@@ -80,6 +81,7 @@ func main() {
 				"merchant_name": "Store ABC",
 				"customer_name": "Jerry",
 			},
+			Description: "Purchase at Store ABC",
 		},
 		Inflight: true,
 	}

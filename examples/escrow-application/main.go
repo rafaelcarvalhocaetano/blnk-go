@@ -73,6 +73,7 @@ func main() {
 				"customer_name":    "Alice Johnson",
 				"customer_id":      "alice-5786",
 			},
+			Description: "Alice Funds",
 		},
 		Inflight: true,
 	}
@@ -100,10 +101,11 @@ func main() {
 				"customer_name":    "Bob Smith",
 				"customer_id":      "bob-5786",
 			},
+			Description: "Fund Bob",
 		},
 	}
 
-	fundBob, resp, err := client.Transaction.Create(fundBobBody)
+	fundBob, _, err := client.Transaction.Create(fundBobBody)
 
 	if err != nil {
 		fmt.Print(err.Error())
@@ -125,6 +127,7 @@ func main() {
 				"customer_name":    "Alice Johnson",
 				"customer_id":      "alice-5786",
 			},
+			Description: "Alice refund",
 		},
 	}
 
@@ -135,4 +138,5 @@ func main() {
 	}
 
 	fmt.Printf("%+v\n", refund)
+	fmt.Println(resp.StatusCode)
 }

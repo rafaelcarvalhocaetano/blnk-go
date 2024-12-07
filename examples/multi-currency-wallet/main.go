@@ -113,6 +113,7 @@ func main() {
 			Currency:    "USD",
 			Source:      "@World",
 			Destination: usdBalance.BalanceID,
+			Description: "Usd Exchange",
 		},
 		AllowOverdraft: true,
 	}
@@ -134,6 +135,7 @@ func main() {
 			Currency:    "EUR",
 			Source:      "@World",
 			Destination: eurBalance.BalanceID,
+			Description: "Eur Exchange",
 		},
 		AllowOverdraft: true,
 	}
@@ -157,6 +159,7 @@ func main() {
 			Currency:    "USD",
 			Source:      usdBalance.BalanceID,
 			Destination: "@World",
+			Description: "Debit",
 		},
 	}
 
@@ -180,6 +183,7 @@ func main() {
 			Source:      eurBalance.BalanceID,
 			Destination: usdBalance.BalanceID,
 			Rate:        1.1,
+			Description: "Exchange",
 		},
 	}
 	fmt.Printf("%+v\n", exchangeBody)

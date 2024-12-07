@@ -48,6 +48,7 @@ func main() {
 			Currency:    "USD",
 			Source:      "@World",
 			Destination: savingsBalance.BalanceID,
+			Description: "Savings",
 		},
 		AllowOverdraft: true,
 	}
