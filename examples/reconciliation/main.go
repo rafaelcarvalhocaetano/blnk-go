@@ -15,15 +15,16 @@ func main() {
 		5*time.Second,
 	), blnkgo.WithRetry(2))
 
-	file, _ := os.Open("/path/to/transactions.json")
+	file, _ := os.Open("file.csv")
+	fmt.Println("file", file.Name())
 	defer file.Close()
-	reconUpload, resp, err := client.Reconciliation.Upload("stripe", file)
+	reconUpload, resp, err := client.Reconciliation.Upload("stripe", file, file.Name())
 	if err != nil {
 		fmt.Print(err.Error())
+		fmt.Println(resp)
 		return
 	}
 
-	fmt.Println(resp.StatusCode)
 	fmt.Println(reconUpload.UploadID)
 
 	matchingRuleB := blnkgo.Matcher{

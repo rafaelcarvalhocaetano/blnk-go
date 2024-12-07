@@ -71,8 +71,8 @@ func (s *ReconciliationService) Run(data RunReconData) (*RunReconResp, *http.Res
 	return reconResp, resp, nil
 }
 
-func (s *ReconciliationService) Upload(source string, file interface{}) (*ReconciliationUploadResp, *http.Response, error) {
-	req, err := s.client.NewFileUploadRequest("reconciliation/upload", "file", file, map[string]string{
+func (s *ReconciliationService) Upload(source string, file interface{}, fileName string) (*ReconciliationUploadResp, *http.Response, error) {
+	req, err := s.client.NewFileUploadRequest("reconciliation/upload", "file", file, fileName, map[string]string{
 		"source": source,
 	})
 	if err != nil {

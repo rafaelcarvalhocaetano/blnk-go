@@ -194,14 +194,13 @@ func (c *Client) DecodeResponse(resp *http.Response, v interface{}) error {
 	return nil
 }
 
-func (c *Client) NewFileUploadRequest(endpoint string, fileParam string, file interface{}, fields map[string]string) (*http.Request, error) {
+func (c *Client) NewFileUploadRequest(endpoint string, fileParam string, file interface{}, fileName string, fields map[string]string) (*http.Request, error) {
 	// Prepare multipart form data
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
 	// Add file to the form
 	var fileReader io.Reader
-	var fileName string
 
 	switch v := file.(type) {
 	case string: // File path
@@ -211,10 +210,15 @@ func (c *Client) NewFileUploadRequest(endpoint string, fileParam string, file in
 		}
 		defer openedFile.Close()
 		fileReader = openedFile
-		fileName = filepath.Base(v)
+		if fileName == "" {
+			fileName = filepath.Base(v)
+		}
 	case io.Reader: // Read stream
 		fileReader = v
-		fileName = "upload" // Default file name
+		// Default file name
+		if fileName == "" {
+			fileName = "upload"
+		}
 	default:
 		return nil, fmt.Errorf("unsupported file input type")
 	}
@@ -234,14 +238,19 @@ func (c *Client) NewFileUploadRequest(endpoint string, fileParam string, file in
 		}
 	}
 
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		fmt.Println("in error", err)
+		return nil, err
+	}
 
 	// Create the HTTP request
-	req, err := http.NewRequest(http.MethodPost, c.BaseURL.ResolveReference(&url.URL{Path: endpoint}).String(), body)
+	req, err := http.NewRequest(http.MethodPost, c.BaseURL.ResolveReference(&url.URL{Path: endpoint}).String(), io.NopCloser(body))
+
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
+	//print out the file type
 	if c.ApiKey != nil {
 		req.Header.Add("X-Blnk-Key", *c.ApiKey)
 	}

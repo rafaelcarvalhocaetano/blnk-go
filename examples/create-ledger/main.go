@@ -23,7 +23,7 @@ func main() {
 		fmt.Print(err.Error())
 		return
 	}
-	println(resp.Body)
+	println(&resp.Body)
 	println(ledger.LedgerID)
 	println(ledger.Name)
 	println(ledger.CreatedAt.GoString())
