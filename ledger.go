@@ -21,6 +21,9 @@ type CreateLedgerRequest struct {
 }
 
 func (s *LedgerService) Get(id string) (*Ledger, *http.Response, error) {
+	if id == "" {
+		return nil, nil, fmt.Errorf("invalid: id is required")
+	}
 	u := fmt.Sprintf("ledgers/%s", id)
 	req, err := s.client.NewRequest(u, http.MethodGet, nil)
 	if err != nil {
@@ -28,7 +31,7 @@ func (s *LedgerService) Get(id string) (*Ledger, *http.Response, error) {
 	}
 
 	ledger := new(Ledger)
-	resp, err := s.client.CallWithRetry(req, &ledger)
+	resp, err := s.client.CallWithRetry(req, ledger)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -43,10 +46,14 @@ func (s *LedgerService) Create(body CreateLedgerRequest) (*Ledger, *http.Respons
 	}
 
 	ledger := new(Ledger)
-	resp, err := s.client.CallWithRetry(req, &ledger)
+	resp, err := s.client.CallWithRetry(req, ledger)
 	if err != nil {
 		return nil, resp, err
 	}
 
 	return ledger, resp, nil
+}
+
+func NewLedgerService(c ClientInterface) *LedgerService {
+	return &LedgerService{client: c}
 }
