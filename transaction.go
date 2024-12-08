@@ -70,6 +70,10 @@ func (s *TransactionService) Create(body CreateTransactionRequest) (*Transaction
 	return transaction, resp, nil
 }
 func (s *TransactionService) Update(transactionID string, body UpdateStatus) (*Transaction, *http.Response, error) {
+	//if transactionId is an empty string, return an error
+	if transactionID == "" {
+		return nil, nil, fmt.Errorf("transactionID is required")
+	}
 	u := fmt.Sprintf("transactions/inflight/%s", transactionID)
 	req, err := s.client.NewRequest(u, http.MethodPut, body)
 	if err != nil {
@@ -99,4 +103,8 @@ func (s *TransactionService) Refund(transactionID string) (*Transaction, *http.R
 	}
 
 	return transaction, resp, nil
+}
+
+func NewTransactionService(client ClientInterface) *TransactionService {
+	return &TransactionService{client: client}
 }

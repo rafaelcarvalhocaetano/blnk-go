@@ -30,8 +30,15 @@ type Client struct {
 	Reconciliation *ReconciliationService
 }
 
+// create a client interface
+type ClientInterface interface {
+	NewRequest(endpoint, method string, opt interface{}) (*http.Request, error)
+	CallWithRetry(req *http.Request, resBody interface{}) (*http.Response, error)
+	NewFileUploadRequest(endpoint string, fileParam string, file interface{}, fileName string, fields map[string]string) (*http.Request, error)
+}
+
 type service struct {
-	client *Client
+	client ClientInterface
 }
 
 type Options struct {

@@ -1,37 +1,47 @@
 package blnkgo
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 func ValidateCreateTransacation(t CreateTransactionRequest) error {
+	var sb strings.Builder
+	sb.WriteString("validation error:")
 	if t.Source != "" && len(t.Sources) > 0 {
-		return errors.New("you can not use both Source and Sources")
+		sb.WriteString("you can not use both Source and Sources")
+		return errors.New(sb.String())
 	}
 
 	if t.Source == "" && len(t.Sources) == 0 {
-		return errors.New("you must use either Source or Sources")
+		sb.WriteString("you must use either Source or Sources")
+		return errors.New(sb.String())
 	}
 
 	if t.Destination != "" && len(t.Destinations) > 0 {
-		return errors.New("you can not use both Destination and Destinations")
+		sb.WriteString("you can not use both Destination and Destinations")
+		return errors.New(sb.String())
 	}
 
 	if t.Destination == "" && len(t.Destinations) == 0 {
-		return errors.New("you must use either Destination or Destinations")
+		sb.WriteString("you must use either Destination or Destinations")
+		return errors.New(sb.String())
 	}
 
 	if t.Amount < 0 {
-		return errors.New("you can not use a negative amount")
+		sb.WriteString("you can not use a negative amount")
+		return errors.New(sb.String())
 	}
 
 	if len(t.Sources) > 0 {
-		err := validateSources(t.Sources, t.Amount)
+		err := validateSources(t.Sources, t.Amount, sb)
 		if err != nil {
 			return err
 		}
 	}
 
 	if len(t.Destinations) > 0 {
-		err := validateSources(t.Destinations, t.Amount)
+		err := validateSources(t.Destinations, t.Amount, sb)
 		if err != nil {
 			return err
 		}
@@ -40,7 +50,7 @@ func ValidateCreateTransacation(t CreateTransactionRequest) error {
 	return nil
 }
 
-func validateSources(sources []Source, amount float64) error {
+func validateSources(sources []Source, amount float64, sb strings.Builder) error {
 	//total amount of sources  must be equal to the amount
 	total := 0.0
 	hasLeft := false
@@ -49,7 +59,8 @@ func validateSources(sources []Source, amount float64) error {
 		//check if the distribution is valid
 		isValid := distribution.IsValid()
 		if !isValid {
-			return errors.New("invalid distribution")
+			sb.WriteString("invalid distribution")
+			return errors.New(sb.String())
 		}
 
 		switch {
@@ -58,7 +69,8 @@ func validateSources(sources []Source, amount float64) error {
 			percentage := distribution.ToPercentage()
 			v := (percentage / 100) * amount
 			if v < 0 {
-				return errors.New("invalid distribution in source: " + source.Identifier)
+				sb.WriteString("invalid distribution in source: " + source.Identifier)
+				return errors.New(sb.String())
 			}
 			total += v
 
@@ -66,20 +78,23 @@ func validateSources(sources []Source, amount float64) error {
 			// Get float value from number
 			number := distribution.ToNumber()
 			if number < 0 {
-				return errors.New("invalid distribution in source: " + source.Identifier)
+				sb.WriteString("invalid distribution in source: " + source.Identifier)
+				return errors.New(sb.String())
 			}
 			total += number
 
 		case distribution.IsLeft():
 			// Ensure "left" distribution is used only once
 			if hasLeft {
-				return errors.New("you cannot use left distribution more than once")
+				sb.WriteString("you cannot use left distribution more than once")
+				return errors.New(sb.String())
 			}
 			hasLeft = true
 
 		default:
+			sb.WriteString("unknown distribution type in source: " + source.Identifier)
 			// Handle invalid or unrecognized distribution
-			return errors.New("unknown distribution type in source: " + source.Identifier)
+			return errors.New(sb.String())
 		}
 	}
 
@@ -87,13 +102,15 @@ func validateSources(sources []Source, amount float64) error {
 	if hasLeft {
 		left := amount - total
 		if left < 0 {
-			return errors.New("total amount of sources exceeds the amount")
+			sb.WriteString("total amount of sources exceeds the amount")
+			return errors.New(sb.String())
 		}
 		total += left
 	}
 
 	if total != amount {
-		return errors.New("total amount of sources must be equal to the amount")
+		sb.WriteString("total amount of sources must be equal to the amount")
+		return errors.New(sb.String())
 	}
 
 	return nil
