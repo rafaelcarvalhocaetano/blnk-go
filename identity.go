@@ -10,15 +10,15 @@ type IdentityService service
 
 type Identity struct {
 	IdentityType     IdentityType           `json:"identity_type"`
-	FirstName        *string                `json:"first_name,omitempty"`
-	LastName         *string                `json:"last_name,omitempty"`
-	OtherNames       *string                `json:"other_names,omitempty"`
-	Gender           *string                `json:"gender,omitempty"`
+	FirstName        string                 `json:"first_name,omitempty"`
+	LastName         string                 `json:"last_name,omitempty"`
+	OtherNames       string                 `json:"other_names,omitempty"`
+	Gender           string                 `json:"gender,omitempty"`
 	DOB              *time.Time             `json:"dob,omitempty"`
 	EmailAddress     string                 `json:"email_address"`
 	PhoneNumber      string                 `json:"phone_number"`
-	Nationality      *string                `json:"nationality,omitempty"`
-	OrganizationName *string                `json:"organization_name,omitempty"`
+	Nationality      string                 `json:"nationality,omitempty"`
+	OrganizationName string                 `json:"organization_name,omitempty"`
 	Category         string                 `json:"category"`
 	Street           string                 `json:"street"`
 	Country          string                 `json:"country"`
@@ -39,12 +39,12 @@ func (s *IdentityService) Create(identity Identity) (*IdentityResponse, *http.Re
 	if err := ValidateCreateIdentity(identity); err != nil {
 		return nil, nil, err
 	}
-	var identityResponse *IdentityResponse
+	identityResponse := new(IdentityResponse)
 	req, err := s.client.NewRequest("identities", http.MethodPost, identity)
 	if err != nil {
 		return nil, nil, err
 	}
-	resp, err := s.client.CallWithRetry(req, &identityResponse)
+	resp, err := s.client.CallWithRetry(req, identityResponse)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -52,13 +52,13 @@ func (s *IdentityService) Create(identity Identity) (*IdentityResponse, *http.Re
 }
 
 func (s *IdentityService) Get(identityId string) (*IdentityResponse, *http.Response, error) {
-	var identityResponse *IdentityResponse
-	u := fmt.Sprintf("identiites/%s", identityId)
+	identityResponse := new(IdentityResponse)
+	u := fmt.Sprintf("identities/%s", identityId)
 	req, err := s.client.NewRequest(u, http.MethodGet, nil)
 	if err != nil {
 		return nil, nil, err
 	}
-	resp, err := s.client.CallWithRetry(req, &identityResponse)
+	resp, err := s.client.CallWithRetry(req, identityResponse)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -90,4 +90,8 @@ func (s *IdentityService) Update(identityId string, identity *Identity) (*Identi
 		return nil, resp, err
 	}
 	return identityResponse, resp, nil
+}
+
+func NewIdentityService(client ClientInterface) *IdentityService {
+	return &IdentityService{client: client}
 }

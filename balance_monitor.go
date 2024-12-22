@@ -33,7 +33,7 @@ func (s *BalanceMonitorService) Create(data MonitorData) (*MonitorDataResp, *htt
 	}
 
 	monitorData := new(MonitorDataResp)
-	resp, err := s.client.CallWithRetry(req, &monitorData)
+	resp, err := s.client.CallWithRetry(req, monitorData)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -78,10 +78,16 @@ func (s *BalanceMonitorService) Update(monitorID string, data MonitorData) (*Mon
 	}
 
 	monitorData := new(MonitorDataResp)
-	resp, err := s.client.CallWithRetry(req, &monitorData)
+	resp, err := s.client.CallWithRetry(req, monitorData)
 	if err != nil {
 		return nil, resp, err
 	}
 
 	return monitorData, resp, nil
+}
+
+func NewBalanceMonitorService(client ClientInterface) *BalanceMonitorService {
+
+	return &BalanceMonitorService{client: client}
+
 }

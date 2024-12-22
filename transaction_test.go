@@ -123,7 +123,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			// Setup mock expectations for CallWithRetry
 			if tt.expectError {
-				mockClient.On("CallWithRetry", mock.Anything, mock.Anything).Return(nil, fmt.Errorf(tt.errorMsg))
+				mockClient.On("CallWithRetry", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("%s", tt.errorMsg))
 			} else {
 				mockClient.On("CallWithRetry", mock.Anything, mock.Anything).Return(
 					&http.Response{},
