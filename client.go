@@ -152,7 +152,6 @@ func (c *Client) NewRequest(endpoint, method string, opt interface{}) (*http.Req
 func (c *Client) CallWithRetry(req *http.Request, resBody interface{}) (*http.Response, error) {
 	retryCount := c.options.RetryCount
 
-	fmt.Println("retry count", retryCount)
 	var resp *http.Response
 	var err error
 
