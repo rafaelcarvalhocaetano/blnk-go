@@ -105,6 +105,26 @@ func (s *TransactionService) Refund(transactionID string) (*Transaction, *http.R
 	return transaction, resp, nil
 }
 
+func (s *TransactionService) Get(transactionID string) (*Transaction, *http.Response, error) {
+	if transactionID == "" {
+		return nil, nil, fmt.Errorf("transactionID is required")
+	}
+
+	u := fmt.Sprintf("transactions/%s", transactionID)
+	req, err := s.client.NewRequest(u, http.MethodGet, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	transaction := new(Transaction)
+	resp, err := s.client.CallWithRetry(req, transaction)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return transaction, resp, nil
+}
+
 func NewTransactionService(client ClientInterface) *TransactionService {
 	return &TransactionService{client: client}
 }
