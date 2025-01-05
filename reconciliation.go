@@ -49,7 +49,7 @@ func (s *ReconciliationService) CreateMatchingRule(matcher Matcher) (*RunReconRe
 	}
 
 	reconResp := new(RunReconResp)
-	resp, err := s.client.CallWithRetry(req, &reconResp)
+	resp, err := s.client.CallWithRetry(req, reconResp)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -63,7 +63,7 @@ func (s *ReconciliationService) Run(data RunReconData) (*RunReconResp, *http.Res
 		return nil, nil, err
 	}
 	reconResp := new(RunReconResp)
-	resp, err := s.client.CallWithRetry(req, &reconResp)
+	resp, err := s.client.CallWithRetry(req, reconResp)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -75,15 +75,20 @@ func (s *ReconciliationService) Upload(source string, file interface{}, fileName
 	req, err := s.client.NewFileUploadRequest("reconciliation/upload", "file", file, fileName, map[string]string{
 		"source": source,
 	})
+
 	if err != nil {
 		return nil, nil, err
 	}
 
 	reconResp := new(ReconciliationUploadResp)
-	resp, err := s.client.CallWithRetry(req, &reconResp)
+	resp, err := s.client.CallWithRetry(req, reconResp)
 	if err != nil {
 		return nil, resp, err
 	}
 
 	return reconResp, resp, nil
+}
+
+func NewReconciliationService(c ClientInterface) *ReconciliationService {
+	return &ReconciliationService{client: c}
 }

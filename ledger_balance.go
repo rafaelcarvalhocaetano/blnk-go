@@ -41,7 +41,7 @@ func (s *LedgerBalanceService) Create(body CreateLedgerBalanceRequest) (*LedgerB
 	}
 
 	ledgerBalance := new(LedgerBalance)
-	resp, err := s.client.CallWithRetry(req, &ledgerBalance)
+	resp, err := s.client.CallWithRetry(req, ledgerBalance)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -50,15 +50,22 @@ func (s *LedgerBalanceService) Create(body CreateLedgerBalanceRequest) (*LedgerB
 }
 
 func (s *LedgerBalanceService) Get(balanceID string) (*LedgerBalance, *http.Response, error) {
+	if balanceID == "" {
+		return nil, nil, fmt.Errorf("invalid: id is required")
+	}
 	u := fmt.Sprintf("balances/%s", balanceID)
 	req, err := s.client.NewRequest(u, http.MethodGet, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 	ledgerBalance := new(LedgerBalance)
-	resp, err := s.client.CallWithRetry(req, &ledgerBalance)
+	resp, err := s.client.CallWithRetry(req, ledgerBalance)
 	if err != nil {
 		return nil, resp, err
 	}
 	return ledgerBalance, resp, nil
+}
+
+func NewLedgerBalanceService(c ClientInterface) *LedgerBalanceService {
+	return &LedgerBalanceService{client: c}
 }

@@ -9,12 +9,12 @@ import (
 type SearchService service
 
 type SearchParams struct {
-	Q        string  `json:"q"`
-	QueryBy  *string `json:"query_by,omitempty"`
-	FilterBy *string `json:"filter_by,omitempty"`
-	SortBy   *string `json:"sort_by,omitempty"`
-	Page     *int    `json:"page,omitempty"`
-	PerPage  *int    `json:"per_page,omitempty"`
+	Q        string `json:"q"`
+	QueryBy  string `json:"query_by,omitempty"`
+	FilterBy string `json:"filter_by,omitempty"`
+	SortBy   string `json:"sort_by,omitempty"`
+	Page     int    `json:"page,omitempty"`
+	PerPage  int    `json:"per_page,omitempty"`
 }
 
 type SearchResponse struct {
@@ -50,10 +50,14 @@ func (s *SearchService) SearchDocument(body SearchParams, resource ResourceType)
 	}
 
 	searchResponse := new(SearchResponse)
-	resp, err := s.client.CallWithRetry(req, &searchResponse)
+	resp, err := s.client.CallWithRetry(req, searchResponse)
 	if err != nil {
 		return nil, resp, err
 	}
 
 	return searchResponse, resp, nil
+}
+
+func NewSearchService(c ClientInterface) *SearchService {
+	return &SearchService{client: c}
 }
