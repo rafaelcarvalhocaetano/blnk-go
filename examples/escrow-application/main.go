@@ -115,7 +115,7 @@ func main() {
 		fmt.Print(err.Error())
 		return
 	}
-	fmt.Printf(fundBob.TransactionID)
+	fmt.Printf("%+v\n", fundBob.TransactionID)
 
 	//refunding Alice
 	refundAliceBody := blnkgo.CreateTransactionRequest{

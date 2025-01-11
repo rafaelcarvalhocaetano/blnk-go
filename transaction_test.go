@@ -45,8 +45,11 @@ func (m *MockClient) CallWithRetry(req *http.Request, v interface{}) (*http.Resp
 }
 
 func (m *MockClient) NewFileUploadRequest(endpoint string, fileParam string, file interface{}, fileName string, fields map[string]string) (*http.Request, error) {
-	args := m.Called(endpoint, fileParam, file)
-	return args.Get(0).(*http.Request), args.Error(1)
+	args := m.Called(endpoint, fileParam, file, fileName, fields)
+	if req, ok := args.Get(0).(*http.Request); ok || args.Get(0) == nil {
+		return req, args.Error(1)
+	}
+	return nil, args.Error(1)
 }
 
 // Helper function to setup mock client and service
