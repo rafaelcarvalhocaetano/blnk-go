@@ -17,6 +17,9 @@ type LedgerBalance struct {
 	InflightCreditBalance int                    `json:"inflight_credit_balance"`
 	DebitBalance          int                    `json:"debit_balance"`
 	InflightDebitBalance  int                    `json:"inflight_debit_balance"`
+	QueuedDebitBalance    int                    `json:"queued_debit_balance,omitempty"`
+	QueuedCreditBalance   int                    `json:"queued_credit_balance,omitempty"`
+	CurrencyMultiplier    float64                `json:"currency_multiplier"`
 	Precision             int                    `json:"precision"`
 	LedgerID              string                 `json:"ledger_id"`
 	IdentityID            string                 `json:"identity_id"`
