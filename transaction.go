@@ -28,6 +28,7 @@ type ParentTransaction struct {
 	Source        string                 `json:"source,omitempty"`
 	Destination   string                 `json:"destination,omitempty"`
 	PreciseAmount int64                  `json:"precise_amount"`
+	SkipQueue     bool                   `json:"skip_queue"`
 	Status        PryTransactionStatus   `json:"status"`
 	MetaData      map[string]interface{} `json:"meta_data,omitempty"`
 }
