@@ -49,6 +49,7 @@ type Transaction struct {
 
 type UpdateStatus struct {
 	Status InflightStatus `json:"status"`
+	Amount float64        `json:"amount"`
 }
 
 func (s *TransactionService) Create(body CreateTransactionRequest) (*Transaction, *http.Response, error) {
