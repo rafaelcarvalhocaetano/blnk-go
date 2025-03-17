@@ -8,8 +8,8 @@ import (
 type Distribution string
 
 var (
-	percentageRegex = regexp.MustCompile(`^\d+%$`)
-	numberRegex     = regexp.MustCompile(`^\d+$`)
+	percentageRegex = regexp.MustCompile(`^\d+(\.\d+)?%$`)
+	numberRegex     = regexp.MustCompile(`^\d+(\.\d+)?$`)
 )
 
 func (d Distribution) IsValid() bool {

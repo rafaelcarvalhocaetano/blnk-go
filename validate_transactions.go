@@ -34,14 +34,14 @@ func ValidateCreateTransacation(t CreateTransactionRequest) error {
 	}
 
 	if len(t.Sources) > 0 {
-		err := validateSources(t.Sources, t.Amount, sb)
+		err := validateSources(t.Sources, t.Amount, &sb)
 		if err != nil {
 			return err
 		}
 	}
 
 	if len(t.Destinations) > 0 {
-		err := validateSources(t.Destinations, t.Amount, sb)
+		err := validateSources(t.Destinations, t.Amount, &sb)
 		if err != nil {
 			return err
 		}
@@ -50,7 +50,7 @@ func ValidateCreateTransacation(t CreateTransactionRequest) error {
 	return nil
 }
 
-func validateSources(sources []Source, amount float64, sb strings.Builder) error {
+func validateSources(sources []Source, amount float64, sb *strings.Builder) error {
 	//total amount of sources  must be equal to the amount
 	total := 0.0
 	hasLeft := false
@@ -59,7 +59,7 @@ func validateSources(sources []Source, amount float64, sb strings.Builder) error
 		//check if the distribution is valid
 		isValid := distribution.IsValid()
 		if !isValid {
-			sb.WriteString("invalid distribution")
+			sb.WriteString("invalid distribution: " + string(distribution))
 			return errors.New(sb.String())
 		}
 
