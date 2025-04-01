@@ -26,7 +26,7 @@ func main() {
 			Sources: []blnkgo.Source{
 				{
 					Identifier:   "@test-1",
-					Distribution: "5.500000%",
+					Distribution: "2000000.00",
 				},
 				{
 					Identifier:   "@test-2",
