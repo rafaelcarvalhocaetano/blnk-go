@@ -2,6 +2,7 @@ package blnkgo
 
 import (
 	"fmt"
+	"math/big"
 	"net/http"
 	"time"
 )
@@ -10,15 +11,15 @@ type LedgerBalanceService service
 
 type LedgerBalance struct {
 	BalanceID             string                 `json:"balance_id"`
-	Balance               int                    `json:"balance"`
-	Version               int                    `json:"version"`
-	InflightBalance       int                    `json:"inflight_balance"`
-	CreditBalance         int                    `json:"credit_balance"`
-	InflightCreditBalance int                    `json:"inflight_credit_balance"`
-	DebitBalance          int                    `json:"debit_balance"`
-	InflightDebitBalance  int                    `json:"inflight_debit_balance"`
-	QueuedDebitBalance    int                    `json:"queued_debit_balance,omitempty"`
-	QueuedCreditBalance   int                    `json:"queued_credit_balance,omitempty"`
+	Balance               *big.Int               `json:"balance"`
+	Version               *big.Int               `json:"version"`
+	InflightBalance       *big.Int               `json:"inflight_balance"`
+	CreditBalance         *big.Int               `json:"credit_balance"`
+	InflightCreditBalance *big.Int               `json:"inflight_credit_balance"`
+	DebitBalance          *big.Int               `json:"debit_balance"`
+	InflightDebitBalance  *big.Int               `json:"inflight_debit_balance"`
+	QueuedDebitBalance    *big.Int               `json:"queued_debit_balance,omitempty"`
+	QueuedCreditBalance   *big.Int               `json:"queued_credit_balance,omitempty"`
 	CurrencyMultiplier    float64                `json:"currency_multiplier"`
 	Precision             int                    `json:"precision"`
 	LedgerID              string                 `json:"ledger_id"`
