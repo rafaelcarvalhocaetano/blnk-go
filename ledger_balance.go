@@ -70,6 +70,26 @@ func (s *LedgerBalanceService) Get(balanceID string) (*LedgerBalance, *http.Resp
 	return ledgerBalance, resp, nil
 }
 
+func (s *LedgerBalanceService) GetByIndicator(indicator string, currency string) (*LedgerBalance, *http.Response, error) {
+	if indicator == "" {
+		return nil, nil, fmt.Errorf("indicator is required")
+	}
+	if currency == "" {
+		return nil, nil, fmt.Errorf("currency is required")
+	}
+	u := fmt.Sprintf("balances/indicator/%s/currency/%s", indicator, currency)
+	req, err := s.client.NewRequest(u, http.MethodGet, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	ledgerBalance := new(LedgerBalance)
+	resp, err := s.client.CallWithRetry(req, ledgerBalance)
+	if err != nil {
+		return nil, resp, err
+	}
+	return ledgerBalance, resp, nil
+}
+
 func NewLedgerBalanceService(c ClientInterface) *LedgerBalanceService {
 	return &LedgerBalanceService{client: c}
 }
