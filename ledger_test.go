@@ -80,6 +80,36 @@ func TestLedgerService_Create_ServerError(t *testing.T) {
 	mockClient.AssertExpectations(t)
 }
 
+func TestLedgerService_List_Success(t *testing.T) {
+	mockClient, svc := setupLedgerService()
+
+	ledgerID := "123"
+	fixedTime := time.Date(2023, time.October, 1, 0, 0, 0, 0, time.UTC)
+	expectedResponse := []blnkgo.Ledger{
+		{
+			Name:      "Test Ledger",
+			LedgerID:  ledgerID,
+			CreatedAt: fixedTime,
+		},
+	}
+
+	mockClient.On("NewRequest", "ledgers", http.MethodGet, nil).Return(&http.Request{}, nil)
+
+	mockClient.On("CallWithRetry", mock.Anything, mock.Anything).Return(&http.Response{
+		StatusCode: http.StatusOK,
+	}, nil).Run(func(args mock.Arguments) {
+		ledgers := args.Get(1).(*[]blnkgo.Ledger)
+		*ledgers = expectedResponse
+	})
+	ledger, resp, err := svc.List()
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedResponse, ledger)
+	assert.NotNil(t, resp)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	mockClient.AssertExpectations(t)
+}
+
 func TestLedgerService_Get_Success(t *testing.T) {
 	mockClient, svc := setupLedgerService()
 	ledgerID := "123"

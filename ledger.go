@@ -20,6 +20,19 @@ type CreateLedgerRequest struct {
 	MetaData map[string]interface{} `json:"meta_data,omitempty"`
 }
 
+func (s *LedgerService) List() ([]Ledger, *http.Response, error) {
+	req, err := s.client.NewRequest("ledgers", http.MethodGet, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	var ledgers []Ledger
+	resp, err := s.client.CallWithRetry(req, &ledgers)
+	if err != nil {
+		return nil, resp, err
+	}
+	return ledgers, resp, nil
+}
+
 func (s *LedgerService) Get(id string) (*Ledger, *http.Response, error) {
 	if id == "" {
 		return nil, nil, fmt.Errorf("invalid: id is required")
