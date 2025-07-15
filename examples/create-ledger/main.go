@@ -27,4 +27,15 @@ func main() {
 	println(ledger.LedgerID)
 	println(ledger.Name)
 	println(ledger.CreatedAt.GoString())
+
+	ledgerList, resp, err := client.Ledger.List()
+	if err != nil {
+		fmt.Print(err.Error())
+		return
+	}
+	for _, el := range ledgerList {
+		println(el.LedgerID)
+		println(el.Name)
+		println(el.CreatedAt.GoString())
+	}
 }
