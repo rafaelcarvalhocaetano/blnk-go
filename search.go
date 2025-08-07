@@ -1,12 +1,62 @@
 package blnkgo
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 type SearchService service
+
+// FlexibleTime is a custom time type that can unmarshal from both Unix timestamp (int64) and RFC3339 string
+type FlexibleTime struct {
+	time.Time
+}
+
+// UnmarshalJSON implements json.Unmarshaler interface
+func (ft *FlexibleTime) UnmarshalJSON(data []byte) error {
+	// Handle null explicitly
+	if string(data) == "null" {
+		return fmt.Errorf("cannot parse time from null value")
+	}
+
+	// Try to unmarshal as Unix timestamp (number)
+	var timestamp int64
+	if err := json.Unmarshal(data, &timestamp); err == nil {
+		ft.Time = time.Unix(timestamp, 0)
+		return nil
+	}
+
+	// Try to unmarshal as string
+	var timeStr string
+	if err := json.Unmarshal(data, &timeStr); err == nil {
+		// Handle empty string
+		if timeStr == "" {
+			return fmt.Errorf("cannot parse time from empty string")
+		}
+
+		// Try parsing as RFC3339
+		if parsedTime, err := time.Parse(time.RFC3339, timeStr); err == nil {
+			ft.Time = parsedTime
+			return nil
+		}
+
+		// Try parsing as Unix timestamp string
+		if timestamp, err := strconv.ParseInt(timeStr, 10, 64); err == nil {
+			ft.Time = time.Unix(timestamp, 0)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("cannot parse time from: %s", string(data))
+}
+
+// MarshalJSON implements json.Marshaler interface
+func (ft FlexibleTime) MarshalJSON() ([]byte, error) {
+	return json.Marshal(ft.Time.Unix())
+}
 
 type SearchParams struct {
 	Q        string `json:"q"`
@@ -31,15 +81,15 @@ type SearchHit struct {
 }
 
 type SearchDocument struct {
-	BalanceID     string                 `json:"balance_id"`
-	Balance       float64                `json:"balance"`
-	CreditBalance float64                `json:"credit_balance"`
-	DebitBalance  float64                `json:"debit_balance"`
-	Currency      string                 `json:"currency"`
-	Precision     int                    `json:"precision"`
-	LedgerID      string                 `json:"ledger_id"`
-	CreatedAt     time.Time              `json:"created_at"`
-	MetaData      map[string]interface{} `json:"meta_data"`
+	BalanceID     string       `json:"balance_id"`
+	Balance       float64      `json:"balance"`
+	CreditBalance float64      `json:"credit_balance"`
+	DebitBalance  float64      `json:"debit_balance"`
+	Currency      string       `json:"currency"`
+	Precision     int          `json:"precision"`
+	LedgerID      string       `json:"ledger_id"`
+	CreatedAt     FlexibleTime `json:"created_at"` // Accepts both Unix timestamp and RFC3339 string
+	MetaData      interface{}  `json:"meta_data"`  // Can be string, map, or other types
 }
 
 func (s *SearchService) SearchDocument(body SearchParams, resource ResourceType) (*SearchResponse, *http.Response, error) {
