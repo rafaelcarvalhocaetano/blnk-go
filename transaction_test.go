@@ -101,6 +101,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			// Setup expected response with fixed time
 			fixedTime := time.Date(2023, time.October, 1, 0, 0, 0, 0, time.UTC)
+			effectiveDate := time.Date(2023, time.September, 15, 10, 0, 0, 0, time.UTC)
 			expectedResp := &blnkgo.Transaction{
 				ParentTransaction: blnkgo.ParentTransaction{
 					Amount:      1000,
@@ -114,8 +115,9 @@ func TestUpdateTransaction(t *testing.T) {
 						"customer_name":    "Alice Johnson",
 						"customer_id":      "alice-5786",
 					},
-					Description: "Alice Funds",
-					Status:      blnkgo.PryTransactionStatus(tt.body.Status),
+					Description:   "Alice Funds",
+					Status:        blnkgo.PryTransactionStatus(tt.body.Status),
+					EffectiveDate: effectiveDate,
 				},
 				TransactionID: "tx-123",
 				CreatedAt:     fixedTime,
@@ -259,6 +261,7 @@ func TestTransactionService_Update_ConcurrentRequests(t *testing.T) {
 
 func TestCreateTransactionSuccess(t *testing.T) {
 	mockClient, svc := setupTransactionService()
+	effectiveDate := time.Date(2023, time.September, 20, 14, 30, 0, 0, time.UTC)
 	body := blnkgo.CreateTransactionRequest{
 		ParentTransaction: blnkgo.ParentTransaction{
 			Amount:      1000,
@@ -272,7 +275,8 @@ func TestCreateTransactionSuccess(t *testing.T) {
 				"customer_name":    "Alice Johnson",
 				"customer_id":      "alice-5786",
 			},
-			Description: "Alice Funds",
+			Description:   "Alice Funds",
+			EffectiveDate: effectiveDate,
 		},
 		Inflight: true,
 	}
@@ -372,15 +376,17 @@ func TestCreate_ServerError(t *testing.T) {
 
 func TestRefundTransaction(t *testing.T) {
 	mockClient, svc := setupTransactionService()
+	effectiveDate := time.Date(2023, time.August, 10, 16, 45, 0, 0, time.UTC)
 	body := blnkgo.Transaction{
 		ParentTransaction: blnkgo.ParentTransaction{
-			Amount:      1000,
-			Reference:   "ref-21",
-			Precision:   100,
-			Currency:    "USD",
-			Source:      "@bank-account",
-			Destination: "@World",
-			Description: "",
+			Amount:        1000,
+			Reference:     "ref-21",
+			Precision:     100,
+			Currency:      "USD",
+			Source:        "@bank-account",
+			Destination:   "@World",
+			Description:   "",
+			EffectiveDate: effectiveDate,
 		},
 	}
 	fixedTime := time.Date(2023, time.October, 1, 0, 0, 0, 0, time.UTC)
@@ -454,16 +460,18 @@ func TestTransactionService_Get(t *testing.T) {
 			statusCode:  http.StatusOK,
 			setupMocks: func(m *MockClient) {
 				fixedTime := time.Date(2023, time.October, 1, 0, 0, 0, 0, time.UTC)
+				effectiveDate := time.Date(2023, time.July, 25, 11, 20, 0, 0, time.UTC)
 				expectedResponse := &blnkgo.Transaction{
 					ParentTransaction: blnkgo.ParentTransaction{
-						Amount:      1000,
-						Reference:   "ref-21",
-						Precision:   100,
-						Currency:    "USD",
-						Source:      "@bank-account",
-						Destination: "@World",
-						Status:      blnkgo.PryTransactionStatusApplied,
-						Description: "Test Transaction",
+						Amount:        1000,
+						Reference:     "ref-21",
+						Precision:     100,
+						Currency:      "USD",
+						Source:        "@bank-account",
+						Destination:   "@World",
+						Status:        blnkgo.PryTransactionStatusApplied,
+						Description:   "Test Transaction",
+						EffectiveDate: effectiveDate,
 					},
 					TransactionID: "tx-123",
 					CreatedAt:     fixedTime,
