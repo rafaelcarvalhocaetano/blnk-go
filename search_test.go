@@ -332,6 +332,7 @@ func TestSearchDocument_TransactionFields(t *testing.T) {
 		"description": "Pontos transferidos do posto para o motorista",
 		"destination": "bln_113a75b0-e838-48b6-934b-18b142295bb3",
 		"destinations": [],
+		"effective_date": 1754599900,
 		"hash": "a872fd9adfe0173810b4d171360b98edc663bd9104a2db4dc53022e2deb348d2",
 		"id": "26",
 		"inflight": false,
@@ -384,9 +385,77 @@ func TestSearchDocument_TransactionFields(t *testing.T) {
 
 	// Test that time fields were parsed correctly
 	expectedTime := time.Unix(1754599843, 0)
+	expectedEffectiveDate := time.Unix(1754599900, 0)
 	assert.Equal(t, expectedTime, doc.CreatedAt.Time)
 	assert.Equal(t, expectedTime, doc.ScheduledFor.Time)
 	assert.Equal(t, expectedTime, doc.InflightExpiryDate.Time)
+	assert.Equal(t, expectedEffectiveDate, doc.EffectiveDate.Time)
+}
+
+func TestSearchDocument_EffectiveDate_Parsing(t *testing.T) {
+	tests := []struct {
+		name         string
+		jsonData     string
+		wantErr      bool
+		expectedTime time.Time
+	}{
+		{
+			name: "EffectiveDate as Unix timestamp",
+			jsonData: `{
+				"transaction_id": "txn_123",
+				"effective_date": 1754599900
+			}`,
+			wantErr:      false,
+			expectedTime: time.Unix(1754599900, 0),
+		},
+		{
+			name: "EffectiveDate as RFC3339 string",
+			jsonData: `{
+				"transaction_id": "txn_123",
+				"effective_date": "2023-08-15T10:30:00Z"
+			}`,
+			wantErr:      false,
+			expectedTime: time.Date(2023, 8, 15, 10, 30, 0, 0, time.UTC),
+		},
+		{
+			name: "EffectiveDate as Unix timestamp string",
+			jsonData: `{
+				"transaction_id": "txn_123",
+				"effective_date": "1754599900"
+			}`,
+			wantErr:      false,
+			expectedTime: time.Unix(1754599900, 0),
+		},
+		{
+			name: "EffectiveDate omitted",
+			jsonData: `{
+				"transaction_id": "txn_123",
+				"amount": 100.0
+			}`,
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var doc blnkgo.SearchDocument
+			err := json.Unmarshal([]byte(tt.jsonData), &doc)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, "txn_123", doc.TransactionID)
+
+				if !tt.expectedTime.IsZero() {
+					assert.Equal(t, tt.expectedTime.Unix(), doc.EffectiveDate.Time.Unix())
+				} else {
+					// If no effective_date is provided, it should be zero time
+					assert.True(t, doc.EffectiveDate.Time.IsZero())
+				}
+			}
+		})
+	}
 }
 
 func TestSearchDocument_LedgerFields(t *testing.T) {

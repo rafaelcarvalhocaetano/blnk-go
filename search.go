@@ -117,6 +117,7 @@ type SearchDocument struct {
 	SkipQueue          bool         `json:"skip_queue,omitempty"`
 	Rate               float64      `json:"rate,omitempty"`
 	PreciseAmount      float64      `json:"precise_amount,omitempty"`
+	EffectiveDate      FlexibleTime `json:"effective_date,omitempty"`
 
 	// Ledger fields
 	Name string `json:"name,omitempty"`
