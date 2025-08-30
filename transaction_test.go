@@ -117,7 +117,7 @@ func TestUpdateTransaction(t *testing.T) {
 					},
 					Description:   "Alice Funds",
 					Status:        blnkgo.PryTransactionStatus(tt.body.Status),
-					EffectiveDate: effectiveDate,
+					EffectiveDate: &effectiveDate,
 				},
 				TransactionID: "tx-123",
 				CreatedAt:     fixedTime,
@@ -276,7 +276,7 @@ func TestCreateTransactionSuccess(t *testing.T) {
 				"customer_id":      "alice-5786",
 			},
 			Description:   "Alice Funds",
-			EffectiveDate: effectiveDate,
+			EffectiveDate: &effectiveDate,
 		},
 		Inflight: true,
 	}
@@ -386,7 +386,7 @@ func TestRefundTransaction(t *testing.T) {
 			Source:        "@bank-account",
 			Destination:   "@World",
 			Description:   "",
-			EffectiveDate: effectiveDate,
+			EffectiveDate: &effectiveDate,
 		},
 	}
 	fixedTime := time.Date(2023, time.October, 1, 0, 0, 0, 0, time.UTC)
@@ -471,7 +471,7 @@ func TestTransactionService_Get(t *testing.T) {
 						Destination:   "@World",
 						Status:        blnkgo.PryTransactionStatusApplied,
 						Description:   "Test Transaction",
-						EffectiveDate: effectiveDate,
+						EffectiveDate: &effectiveDate,
 					},
 					TransactionID: "tx-123",
 					CreatedAt:     fixedTime,
