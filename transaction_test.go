@@ -551,3 +551,130 @@ func TestTransactionService_Get(t *testing.T) {
 		})
 	}
 }
+
+func TestTransactionService_Filter_Success(t *testing.T) {
+	mockClient, svc := setupTransactionService()
+
+	body := blnkgo.FilterParams{
+		Filters: []blnkgo.Filter{
+			{Field: "status", Operator: blnkgo.OpEqual, Value: "APPLIED"},
+			{Field: "amount", Operator: blnkgo.OpGreaterThanOrEqual, Value: 10000},
+		},
+		SortBy:    "amount",
+		SortOrder: "desc",
+		Limit:     50,
+	}
+
+	fixedTime := time.Date(2024, time.January, 15, 10, 30, 0, 0, time.UTC)
+	expectedResponse := &blnkgo.FilterResponse{
+		Data: []blnkgo.Transaction{
+			{
+				ParentTransaction: blnkgo.ParentTransaction{
+					Amount:   15000,
+					Currency: "USD",
+					Status:   blnkgo.PryTransactionStatusApplied,
+				},
+				TransactionID: "txn_abc123",
+				CreatedAt:     fixedTime,
+			},
+		},
+	}
+
+	mockClient.On("NewRequest", "transactions/filter", http.MethodPost, body).Return(&http.Request{}, nil)
+	mockClient.On("CallWithRetry", mock.Anything, mock.Anything).Return(&http.Response{
+		StatusCode: http.StatusOK,
+	}, nil).Run(func(args mock.Arguments) {
+		result := args.Get(1).(*blnkgo.FilterResponse)
+		*result = *expectedResponse
+	})
+
+	result, resp, err := svc.Filter(body)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.NotNil(t, resp)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	mockClient.AssertExpectations(t)
+}
+
+func TestTransactionService_Filter_DateRange(t *testing.T) {
+	mockClient, svc := setupTransactionService()
+
+	body := blnkgo.FilterParams{
+		Filters: []blnkgo.Filter{
+			{Field: "created_at", Operator: blnkgo.OpGreaterThanOrEqual, Value: "2024-01-01"},
+			{Field: "created_at", Operator: blnkgo.OpLessThan, Value: "2024-04-01"},
+		},
+	}
+
+	fixedTime := time.Date(2024, time.February, 14, 9, 0, 0, 0, time.UTC)
+	expectedResponse := &blnkgo.FilterResponse{
+		Data: []blnkgo.Transaction{
+			{
+				ParentTransaction: blnkgo.ParentTransaction{
+					Amount:   5000,
+					Currency: "USD",
+					Status:   blnkgo.PryTransactionStatusApplied,
+				},
+				TransactionID: "txn_q1_001",
+				CreatedAt:     fixedTime,
+			},
+		},
+	}
+
+	mockClient.On("NewRequest", "transactions/filter", http.MethodPost, body).Return(&http.Request{}, nil)
+	mockClient.On("CallWithRetry", mock.Anything, mock.Anything).Return(&http.Response{
+		StatusCode: http.StatusOK,
+	}, nil).Run(func(args mock.Arguments) {
+		result := args.Get(1).(*blnkgo.FilterResponse)
+		*result = *expectedResponse
+	})
+
+	result, resp, err := svc.Filter(body)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.NotNil(t, resp)
+	mockClient.AssertExpectations(t)
+}
+
+func TestTransactionService_Filter_NewRequestError(t *testing.T) {
+	mockClient, svc := setupTransactionService()
+
+	body := blnkgo.FilterParams{
+		Filters: []blnkgo.Filter{
+			{Field: "status", Operator: blnkgo.OpEqual, Value: "APPLIED"},
+		},
+	}
+
+	mockClient.On("NewRequest", "transactions/filter", http.MethodPost, body).Return(nil, fmt.Errorf("request error"))
+
+	result, resp, err := svc.Filter(body)
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Nil(t, resp)
+	mockClient.AssertExpectations(t)
+}
+
+func TestTransactionService_Filter_ServerError(t *testing.T) {
+	mockClient, svc := setupTransactionService()
+
+	body := blnkgo.FilterParams{
+		Filters: []blnkgo.Filter{
+			{Field: "status", Operator: blnkgo.OpEqual, Value: "APPLIED"},
+		},
+	}
+
+	expectedResp := &http.Response{StatusCode: http.StatusInternalServerError}
+
+	mockClient.On("NewRequest", "transactions/filter", http.MethodPost, body).Return(&http.Request{}, nil)
+	mockClient.On("CallWithRetry", mock.Anything, mock.Anything).Return(expectedResp, fmt.Errorf("server error"))
+
+	result, resp, err := svc.Filter(body)
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Equal(t, expectedResp, resp)
+	mockClient.AssertExpectations(t)
+}

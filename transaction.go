@@ -9,14 +9,12 @@ import (
 
 type TransactionService service
 
-// MultipleSourcesT represents multiple sources for a transaction.
 type Source struct {
 	Identifier   string       `json:"identifier"`
 	Distribution Distribution `json:"distribution"`
 	Narration    string       `json:"narration,omitempty"`
 }
 
-// CreateTransactionResponse represents the response for creating a transaction.
 type ParentTransaction struct {
 	Amount        float64                `json:"amount"`
 	Reference     string                 `json:"reference"`
@@ -74,6 +72,7 @@ func (s *TransactionService) Create(body CreateTransactionRequest) (*Transaction
 
 	return transaction, resp, nil
 }
+
 func (s *TransactionService) Update(transactionID string, body UpdateStatus) (*Transaction, *http.Response, error) {
 	//if transactionId is an empty string, return an error
 	if transactionID == "" {
@@ -128,6 +127,21 @@ func (s *TransactionService) Get(transactionID string) (*Transaction, *http.Resp
 	}
 
 	return transaction, resp, nil
+}
+
+func (s *TransactionService) Filter(params FilterParams) (*FilterResponse, *http.Response, error) {
+	req, err := s.client.NewRequest("transactions/filter", http.MethodPost, params)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var filterResponse FilterResponse
+	resp, err := s.client.CallWithRetry(req, &filterResponse)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return &filterResponse, resp, nil
 }
 
 func NewTransactionService(client ClientInterface) *TransactionService {

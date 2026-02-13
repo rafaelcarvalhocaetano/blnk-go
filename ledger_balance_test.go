@@ -261,3 +261,88 @@ func TestLedgerBalanceService_GetByIndicator(t *testing.T) {
 		})
 	}
 }
+
+func TestLedgerBalanceService_Filter_Success(t *testing.T) {
+	mockClient, svc := setupLedgerBalanceService()
+
+	body := blnkgo.FilterParams{
+		Filters: []blnkgo.Filter{
+			{Field: "currency", Operator: blnkgo.OpEqual, Value: "USD"},
+			{Field: "balance", Operator: blnkgo.OpGreaterThan, Value: 0},
+		},
+		IncludeCount: true,
+	}
+
+	fixedTime := time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
+	totalCount := int64(1)
+	expectedResponse := &blnkgo.FilterResponse{
+		Data: []blnkgo.LedgerBalance{
+			{
+				BalanceID: "bln_xyz789",
+				Currency:  "USD",
+				LedgerID:  "ldg_main001",
+				CreatedAt: fixedTime,
+			},
+		},
+		TotalCount: &totalCount,
+	}
+
+	mockClient.On("NewRequest", "balances/filter", http.MethodPost, body).Return(&http.Request{}, nil)
+	mockClient.On("CallWithRetry", mock.Anything, mock.Anything).Return(&http.Response{
+		StatusCode: http.StatusOK,
+	}, nil).Run(func(args mock.Arguments) {
+		result := args.Get(1).(*blnkgo.FilterResponse)
+		*result = *expectedResponse
+	})
+
+	result, resp, err := svc.Filter(body)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.NotNil(t, result.TotalCount)
+	assert.Equal(t, int64(1), *result.TotalCount)
+	assert.NotNil(t, resp)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	mockClient.AssertExpectations(t)
+}
+
+func TestLedgerBalanceService_Filter_NewRequestError(t *testing.T) {
+	mockClient, svc := setupLedgerBalanceService()
+
+	body := blnkgo.FilterParams{
+		Filters: []blnkgo.Filter{
+			{Field: "currency", Operator: blnkgo.OpEqual, Value: "USD"},
+		},
+	}
+
+	mockClient.On("NewRequest", "balances/filter", http.MethodPost, body).Return(nil, fmt.Errorf("request error"))
+
+	result, resp, err := svc.Filter(body)
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Nil(t, resp)
+	mockClient.AssertExpectations(t)
+}
+
+func TestLedgerBalanceService_Filter_ServerError(t *testing.T) {
+	mockClient, svc := setupLedgerBalanceService()
+
+	body := blnkgo.FilterParams{
+		Filters: []blnkgo.Filter{
+			{Field: "currency", Operator: blnkgo.OpEqual, Value: "USD"},
+		},
+	}
+
+	expectedResp := &http.Response{StatusCode: http.StatusInternalServerError}
+
+	mockClient.On("NewRequest", "balances/filter", http.MethodPost, body).Return(&http.Request{}, nil)
+	mockClient.On("CallWithRetry", mock.Anything, mock.Anything).Return(expectedResp, fmt.Errorf("server error"))
+
+	result, resp, err := svc.Filter(body)
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Equal(t, expectedResp, resp)
+	mockClient.AssertExpectations(t)
+}

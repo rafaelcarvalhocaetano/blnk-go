@@ -67,6 +67,21 @@ func (s *LedgerService) Create(body CreateLedgerRequest) (*Ledger, *http.Respons
 	return ledger, resp, nil
 }
 
+func (s *LedgerService) Filter(body FilterParams) (*FilterResponse, *http.Response, error) {
+	req, err := s.client.NewRequest("ledgers/filter", http.MethodPost, body)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var filterResponse FilterResponse
+	resp, err := s.client.CallWithRetry(req, &filterResponse)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return &filterResponse, resp, nil
+}
+
 func NewLedgerService(c ClientInterface) *LedgerService {
 	return &LedgerService{client: c}
 }
