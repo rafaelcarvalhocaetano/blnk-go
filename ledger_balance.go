@@ -90,6 +90,21 @@ func (s *LedgerBalanceService) GetByIndicator(indicator string, currency string)
 	return ledgerBalance, resp, nil
 }
 
+func (s *LedgerBalanceService) Filter(params FilterParams) (*FilterResponse, *http.Response, error) {
+	req, err := s.client.NewRequest("balances/filter", http.MethodPost, params)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var filterResponse FilterResponse
+	resp, err := s.client.CallWithRetry(req, &filterResponse)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return &filterResponse, resp, nil
+}
+
 func NewLedgerBalanceService(c ClientInterface) *LedgerBalanceService {
 	return &LedgerBalanceService{client: c}
 }

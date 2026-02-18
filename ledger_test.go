@@ -167,3 +167,88 @@ func TestLedgerSerice_Get_EmptyID(t *testing.T) {
 	mockClient.AssertNotCalled(t, "CallWithRetry")
 	mockClient.AssertExpectations(t)
 }
+
+func TestLedgerService_Filter_Success(t *testing.T) {
+	mockClient, svc := setupLedgerService()
+
+	body := blnkgo.FilterParams{
+		Filters: []blnkgo.Filter{
+			{Field: "name", Operator: blnkgo.OpILike, Value: "%savings%"},
+		},
+		SortBy:    "name",
+		SortOrder: "asc",
+	}
+
+	fixedTime := time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
+	expectedResponse := &blnkgo.FilterResponse{
+		Data: []blnkgo.Ledger{
+			{
+				LedgerID:  "ldg_savings_001",
+				Name:      "Customer Savings Accounts",
+				CreatedAt: fixedTime,
+			},
+			{
+				LedgerID:  "ldg_savings_002",
+				Name:      "High-Yield Savings",
+				CreatedAt: fixedTime,
+			},
+		},
+	}
+
+	mockClient.On("NewRequest", "ledgers/filter", http.MethodPost, body).Return(&http.Request{}, nil)
+	mockClient.On("CallWithRetry", mock.Anything, mock.Anything).Return(&http.Response{
+		StatusCode: http.StatusOK,
+	}, nil).Run(func(args mock.Arguments) {
+		result := args.Get(1).(*blnkgo.FilterResponse)
+		*result = *expectedResponse
+	})
+
+	result, resp, err := svc.Filter(body)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.NotNil(t, resp)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	mockClient.AssertExpectations(t)
+}
+
+func TestLedgerService_Filter_NewRequestError(t *testing.T) {
+	mockClient, svc := setupLedgerService()
+
+	body := blnkgo.FilterParams{
+		Filters: []blnkgo.Filter{
+			{Field: "name", Operator: blnkgo.OpEqual, Value: "test"},
+		},
+	}
+
+	mockClient.On("NewRequest", "ledgers/filter", http.MethodPost, body).Return(nil, fmt.Errorf("request error"))
+
+	result, resp, err := svc.Filter(body)
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Nil(t, resp)
+	mockClient.AssertExpectations(t)
+}
+
+func TestLedgerService_Filter_ServerError(t *testing.T) {
+	mockClient, svc := setupLedgerService()
+
+	body := blnkgo.FilterParams{
+		Filters: []blnkgo.Filter{
+			{Field: "name", Operator: blnkgo.OpEqual, Value: "test"},
+		},
+	}
+
+	expectedResp := &http.Response{StatusCode: http.StatusInternalServerError}
+
+	mockClient.On("NewRequest", "ledgers/filter", http.MethodPost, body).Return(&http.Request{}, nil)
+	mockClient.On("CallWithRetry", mock.Anything, mock.Anything).Return(expectedResp, fmt.Errorf("server error"))
+
+	result, resp, err := svc.Filter(body)
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Equal(t, expectedResp, resp)
+	mockClient.AssertExpectations(t)
+}
