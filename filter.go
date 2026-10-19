@@ -46,9 +46,12 @@ type FilterResponse struct {
 func (f *FilterResponse) UnmarshalJSON(data []byte) error {
 	type alias FilterResponse
 	var aux alias
-	if err := json.Unmarshal(data, &aux); err == nil && aux.Data != nil {
+	if err := json.Unmarshal(data, &aux); err == nil {
 		f.Data = aux.Data
 		f.TotalCount = aux.TotalCount
+		if f.TotalCount == nil {
+			f.TotalCount = new(int64)
+		}
 		return nil
 	}
 
@@ -58,6 +61,6 @@ func (f *FilterResponse) UnmarshalJSON(data []byte) error {
 	}
 
 	f.Data = slice
-	f.TotalCount = nil
+	f.TotalCount = new(int64)
 	return nil
 }
