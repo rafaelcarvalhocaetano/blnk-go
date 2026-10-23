@@ -49,9 +49,6 @@ func (f *FilterResponse) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &aux); err == nil {
 		f.Data = aux.Data
 		f.TotalCount = aux.TotalCount
-		if f.TotalCount == nil {
-			f.TotalCount = new(int64)
-		}
 		return nil
 	}
 
@@ -61,6 +58,6 @@ func (f *FilterResponse) UnmarshalJSON(data []byte) error {
 	}
 
 	f.Data = slice
-	f.TotalCount = new(int64)
+	f.TotalCount = nil
 	return nil
 }

@@ -235,8 +235,29 @@ func TestFilterResponse_UnmarshalJSON_WithNullData(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Nil(t, resp.Data)
-	assert.NotNil(t, resp.TotalCount)
-	assert.Equal(t, int64(0), *resp.TotalCount)
+	assert.Nil(t, resp.TotalCount)
+}
+
+func TestFilterResponse_UnmarshalJSON_WithDataAndOmittedCount(t *testing.T) {
+	jsonData := `{"data": [{"balance_id": "bln_123"}]}`
+
+	var resp blnkgo.FilterResponse
+	err := resp.UnmarshalJSON([]byte(jsonData))
+
+	assert.NoError(t, err)
+	assert.NotNil(t, resp.Data)
+	assert.Nil(t, resp.TotalCount)
+}
+
+func TestFilterResponse_UnmarshalJSON_WithNullCount(t *testing.T) {
+	jsonData := `{"data": [], "total_count": null}`
+
+	var resp blnkgo.FilterResponse
+	err := resp.UnmarshalJSON([]byte(jsonData))
+
+	assert.NoError(t, err)
+	assert.NotNil(t, resp.Data)
+	assert.Nil(t, resp.TotalCount)
 }
 
 func TestFilterResponse_UnmarshalJSON_WithNullDataAndZeroCount(t *testing.T) {
